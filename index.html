@@ -371,9 +371,13 @@
 <div id="app">
     <div id="audio-bar">
         <button id="audio-file-btn">בחרי קובץ שמע</button>
-        <input type="file" id="audio-file-input" accept="audio/*" style="display:none">
+        <input type="file" id="audio-file-input" accept="audio/*,video/*" style="display:none">
         <span id="audio-file-name">לא נבחר קובץ עדיין</span>
-        <audio id="song-audio"></audio>
+        <!-- <video>, not <audio> — broader codec/container support (handles
+             audio extracted from a video file, like a WhatsApp export, that
+             an <audio> tag sometimes refuses to decode). Kept invisible;
+             only its sound is used. -->
+        <video id="song-audio" style="display:none" playsinline></video>
     </div>
     <div id="speed-bar">
         <button id="play-pause" class="speed-step-btn">⏸</button>
@@ -460,6 +464,7 @@
         if (!file) return;
         audioEl.src = URL.createObjectURL(file);
         fileNameEl.textContent = file.name;
+        fileNameEl.style.color = '';
         songIdx = 0;
         songHit = false;
     });
@@ -511,8 +516,16 @@
         else { player.playVideo(); playPauseBtn.textContent = '⏸'; }
     });
     audioEl.addEventListener('ended', () => {
+        // Guard against a false "ended" firing right after a file that
+        // failed to actually decode/play — only treat it as a real
+        // end-of-song if real time actually elapsed.
+        if (audioEl.currentTime < 0.5) return;
         isPaused = true;
         playPauseBtn.textContent = '🔁';
+    });
+    audioEl.addEventListener('error', () => {
+        fileNameEl.textContent = 'לא הצלחתי לנגן את הקובץ הזה — נסי קובץ אחר';
+        fileNameEl.style.color = '#ff8a8a';
     });
 
     // --- Calibration tool: tap "mark now" every time a character hits the
