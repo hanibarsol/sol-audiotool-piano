@@ -568,10 +568,8 @@
         setTimeout(() => { calibCopyBtn.textContent = 'העתק תוצאות'; }, 2500);
     });
 
-    // No calibrated song yet — she calibrates live per audio file via the
-    // ?admin=1 panel above, then this can be filled in once she has one.
-    const songTimes = [];
-    const songLetters = [];
+    const songTimes = [0.76, 1.31, 1.77, 2.32, 2.88, 3.49, 4.04, 5.38, 5.92, 6.45, 7.04, 7.72, 9.66, 10.28, 10.82, 11.38, 11.96, 12.52, 13.08, 14.26, 14.86, 15.48, 16.08, 16.66];
+    const songLetters = ['C', 'C', 'C', 'G', 'A', 'A', 'G', 'E', 'E', 'D', 'D', 'C', 'C', 'C', 'C', 'G', 'A', 'A', 'G', 'E', 'E', 'D', 'D', 'C'];
     const songNotes = songTimes.map((t, i) => ({ time: t, note: songLetters[i] + '4' }));
 
     const songNoteTotals = {};
