@@ -60,48 +60,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        /* Whether the loaded file's own audio is heard, independent of the
-           piano's own sound. Off by default — hearing the original
-           recording play automatically alongside pressed piano notes was
-           confusing, not helpful. */
-        #audio-toggle-wrap {
-            touch-action: auto;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-        }
-        #audio-toggle {
-            touch-action: auto;
-            width: 40px; height: 40px;
-            flex: 0 0 auto;
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.12);
-            background: #262626;
-            color: rgba(255,255,255,0.35);
-            font-size: 17px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-        #audio-toggle.active {
-            background: radial-gradient(circle at 35% 30%, #4fa3ff, #1a5fc4 75%);
-            border-color: #7ec4ff;
-            color: #fff;
-            box-shadow: 0 0 8px 2px rgba(79,163,255,0.75);
-        }
-        #audio-toggle-label {
-            touch-action: auto;
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 20px;
-            padding: 9px 20px;
-            font-size: 15px;
-            font-family: Arial, sans-serif;
-            background: #262626;
-            color: rgba(255,255,255,0.6);
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
         #speed-bar {
             flex: 0 0 auto;
             display: flex;
@@ -422,11 +380,7 @@
              audio extracted from a video file, like a WhatsApp export, that
              an <audio> tag sometimes refuses to decode). Kept invisible;
              only its sound is used. -->
-        <video id="song-audio" style="display:none" playsinline muted></video>
-        <div id="audio-toggle-wrap">
-            <button id="audio-toggle" title="שמע הקובץ המקורי">🔇</button>
-            <span id="audio-toggle-label">השמעת הקובץ המקורי</span>
-        </div>
+        <video id="song-audio" style="display:none" playsinline></video>
     </div>
     <div id="speed-bar">
         <button id="play-pause" class="speed-step-btn">⏸</button>
@@ -504,19 +458,6 @@
         setPlaybackRate: (r) => { audioEl.playbackRate = r; },
         getPlayerState: () => audioEl.ended ? PlayerState.ENDED : (audioEl.paused ? PlayerState.PAUSED : PlayerState.PLAYING),
     };
-
-    // Whether the loaded file's own audio is heard, independent of the
-    // piano's own sound. Off by default — nothing plays unasked; opting in
-    // is a deliberate choice, same as the split-screen lesson pages.
-    let audioOn = false;
-    audioEl.muted = true;
-    const audioToggleBtn = document.getElementById('audio-toggle');
-    audioToggleBtn.addEventListener('click', () => {
-        audioOn = !audioOn;
-        audioEl.muted = !audioOn;
-        audioToggleBtn.classList.toggle('active', audioOn);
-        audioToggleBtn.textContent = audioOn ? '🔊' : '🔇';
-    });
 
     fileBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', () => {
