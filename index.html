@@ -567,10 +567,8 @@
         setTimeout(() => { calibCopyBtn.textContent = 'העתק תוצאות'; }, 2500);
     });
 
-    // No calibrated song yet — filled in per audio file via the ?admin=1
-    // panel above, then sent over for this to be updated.
-    const songTimes = [];
-    const songLetters = [];
+    const songTimes = [1.28, 2.14, 2.71, 3.21, 4.30, 4.95, 5.52, 6.60, 7.16, 7.67, 8.67, 9.28, 9.79, 10.91, 11.51, 12.04, 12.57, 13.10, 13.65, 14.18, 15.28, 16.36, 18.55, 19.67, 20.21, 20.80, 21.89, 22.48, 23.06, 24.21, 24.78, 25.32, 26.48, 27.02, 27.60, 28.77, 29.32, 29.95, 30.49, 31.09, 31.59, 32.18, 33.39, 34.72];
+    const songLetters = ['E', 'E', 'E', 'E', 'D', 'C', 'F', 'F', 'F', 'F', 'E', 'D', 'G', 'G', 'A', 'G', 'F', 'E', 'D', 'E', 'F', 'G', 'E', 'E', 'E', 'E', 'D', 'C', 'F', 'F', 'F', 'F', 'E', 'D', 'G', 'G', 'A', 'G', 'F', 'E', 'D', 'E', 'D', 'C'];
     const songNotes = songTimes.map((t, i) => ({ time: t, note: songLetters[i] + '4' }));
 
     const songNoteTotals = {};
