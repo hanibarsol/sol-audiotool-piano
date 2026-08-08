@@ -196,14 +196,48 @@
             width: calc(var(--white-w) * 0.6);
             height: calc(var(--white-w) * 0.6);
             transform: translateX(-50%);
+            pointer-events: none;
+        }
+        /* The circular clip lives on an inner wrapper (not .falling-note
+           itself) so a sharp-note badge can sit at the outer element's
+           corner without being cut off by the avatar's own round mask. */
+        .falling-note-avatar {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             overflow: hidden;
             border: 2px solid rgba(0,0,0,0.85);
             box-shadow: 0 2px 6px rgba(0,0,0,0.5), 0 0 10px 2px rgba(255,255,255,0.65);
             background: #333;
-            pointer-events: none;
         }
-        .falling-note img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .falling-note-avatar img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        /* Sharps don't have their own character in the do-re-mi-fa-sol-la-si
+           cast, so a sharp note reuses its neighboring natural's character
+           with this small black-circle badge marking it as "the black key
+           version" — on both the physical key and the falling tile. */
+        .sharp-badge {
+            position: absolute;
+            top: -6%;
+            right: 4%;
+            width: 38%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #555, #000 80%);
+            border: 2px solid #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .key.sharp-glow {
+            box-shadow: 0 0 10px 3px rgba(111,214,201,0.65), inset 0 0 0 2px rgba(111,214,201,0.55);
+        }
+        .falling-note.sharp {
+            left: 100%;
+        }
+        .falling-note.sharp .falling-note-avatar {
+            border-color: var(--teal);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5), 0 0 12px 4px rgba(111,214,201,0.85);
+        }
         @keyframes bubble-pop {
             0%   { transform: translateX(-50%) scale(1); opacity: 1; }
             30%  { transform: translateX(-50%) scale(0.85); opacity: 1; }
@@ -567,8 +601,8 @@
         setTimeout(() => { calibCopyBtn.textContent = 'העתק תוצאות'; }, 2500);
     });
 
-    const songTimes = [1.28, 2.14, 2.71, 3.21, 4.30, 4.95, 5.52, 6.60, 7.16, 7.67, 8.67, 9.28, 9.79, 10.91, 11.51, 12.04, 12.57, 13.10, 13.65, 14.18, 15.28, 16.36, 18.55, 19.67, 20.21, 20.80, 21.89, 22.48, 23.06, 24.21, 24.78, 25.32, 26.48, 27.02, 27.60, 28.77, 29.32, 29.95, 30.49, 31.09, 31.59, 32.18, 33.39, 34.72];
-    const songLetters = ['E', 'E', 'E', 'E', 'D', 'C', 'F', 'F', 'F', 'F', 'E', 'D', 'G', 'G', 'A', 'G', 'F', 'E', 'D', 'E', 'F', 'G', 'E', 'E', 'E', 'E', 'D', 'C', 'F', 'F', 'F', 'F', 'E', 'D', 'G', 'G', 'A', 'G', 'F', 'E', 'D', 'E', 'D', 'C'];
+    const songTimes = [0.69, 1.06, 1.32, 2.69, 3.45, 3.83, 4.29, 6.67, 7.27, 7.75, 9.40, 10.21, 10.63, 11.05, 13.26, 14.13, 14.90, 15.75, 16.48, 17.26, 18.03, 18.83, 19.88, 20.44, 21.98, 22.83, 23.62];
+    const songLetters = ['C', 'D#', 'G', 'F', 'D#', 'F', 'G', 'C', 'D#', 'G', 'F', 'D#', 'F', 'G', 'C', 'D#', 'D#', 'F', 'F', 'G', 'G', 'G#', 'F', 'D#', 'D', 'D', 'C'];
     const songNotes = songTimes.map((t, i) => ({ time: t, note: songLetters[i] + '4' }));
 
     const songNoteTotals = {};
@@ -608,6 +642,12 @@
     const keyByNote = {};
 
     const characterImages = ["דו.png", "רה.png", "מי.png", "פה.png", "סול.png", "לה.png", "סי.png"];
+    // Same do-re-mi-fa-sol-la-si order the keys and characterImages are
+    // built in. Declared here (not just down by the falling-note lane)
+    // because the key-building loop below also needs it, to find a sharp
+    // key's neighboring natural for the "character + black-circle badge"
+    // treatment.
+    const noteLetterOrder = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 
     const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const octaves = [4];
@@ -680,6 +720,21 @@
                 img.className = 'character-img';
                 key.appendChild(img);
                 whiteKeyIndex++;
+            } else if (songNoteTotals[fullNote]) {
+                // A sharp actually used by this song — show its neighboring
+                // natural's character plus the black-circle badge, so the
+                // key isn't just a bare unlabeled strip.
+                const baseIdx = noteLetterOrder.indexOf(note[0]);
+                if (baseIdx !== -1) {
+                    const img = document.createElement('img');
+                    img.src = characterImages[baseIdx] || "";
+                    img.className = 'character-img';
+                    key.appendChild(img);
+                    const badge = document.createElement('div');
+                    badge.className = 'sharp-badge';
+                    key.appendChild(badge);
+                    key.classList.add('sharp-glow');
+                }
             }
 
             const playNote = () => {
@@ -735,7 +790,6 @@
         });
     });
 
-    const noteLetterOrder = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     const laneCols = {};
     noteLetterOrder.forEach((letter) => {
         const col = document.createElement('div');
@@ -768,9 +822,18 @@
                 if (!tile) {
                     tile = document.createElement('div');
                     tile.className = 'falling-note';
+                    const avatar = document.createElement('div');
+                    avatar.className = 'falling-note-avatar';
                     const img = document.createElement('img');
                     img.src = characterImages[noteLetterOrder.indexOf(letter)] || '';
-                    tile.appendChild(img);
+                    avatar.appendChild(img);
+                    tile.appendChild(avatar);
+                    if (n.note.includes('#')) {
+                        tile.classList.add('sharp');
+                        const badge = document.createElement('div');
+                        badge.className = 'sharp-badge';
+                        tile.appendChild(badge);
+                    }
                     col.appendChild(tile);
                     activeTiles.set(i, tile);
                 }
